@@ -1,0 +1,13 @@
+D:\Sources\LucyAutoExAddIn\bin\Debug\LucyAutoExAddIn.dll
+D:\Sources\LucyAutoExAddIn\bin\Debug\LucyAutoExAddIn.pdb
+D:\Sources\LucyAutoExAddIn\bin\Debug\LucyAutoExAddIn.dll.manifest
+D:\Sources\LucyAutoExAddIn\bin\Debug\LucyAutoExAddIn.vsto
+D:\Sources\LucyAutoExAddIn\bin\Debug\Microsoft.Office.Tools.Common.v4.0.Utilities.dll
+D:\Sources\LucyAutoExAddIn\obj\Debug\LucyAutoExAddIn.csprojAssemblyReference.cache
+D:\Sources\LucyAutoExAddIn\obj\Debug\LucyAutoExAddIn.LucyAutoRibbon.resources
+D:\Sources\LucyAutoExAddIn\obj\Debug\LucyAutoExAddIn.Properties.Resources.resources
+D:\Sources\LucyAutoExAddIn\obj\Debug\LucyAutoExAddIn.csproj.GenerateResource.cache
+D:\Sources\LucyAutoExAddIn\obj\Debug\LucyAutoExAddIn.csproj.CoreCompileInputs.cache
+D:\Sources\LucyAutoExAddIn\obj\Debug\LucyAutoExAddIn.csproj.CopyComplete
+D:\Sources\LucyAutoExAddIn\obj\Debug\LucyAutoExAddIn.dll
+D:\Sources\LucyAutoExAddIn\obj\Debug\LucyAutoExAddIn.pdb
