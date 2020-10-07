@@ -9,15 +9,21 @@ using Microsoft.Office.Tools.Ribbon;
 
 namespace LucyAutoExAddIn
 {
+
+  // all ribbon magic happens here
+
   public partial class LucyAutoRibbon
   {
     private void LucyAutoRibbon_Load(object sender, RibbonUIEventArgs e)
     {
-
+      // this function called as ribbon loaded
     }
 
     private bool IsValidCell(string cell_str)
     {
+      // this checks if string represents valid cell
+      // for example A1 or B42 is valid, but A2A not
+
       bool charMode = true;
       foreach (var c in cell_str)
       {
@@ -44,6 +50,9 @@ namespace LucyAutoExAddIn
 
     private bool IsValidRange(string range_str)
     {
+      // checks if range represented by string is valid
+      // valid range example A3:B6
+
       var substr = range_str.Split(':');
 
       if (2 != substr.Length) return false;
@@ -57,19 +66,27 @@ namespace LucyAutoExAddIn
 
     private Worksheet GetSheetByName(string name)
     {
+      // iterate over all sheets in document and return sheet with given name
+
       foreach (Worksheet sheet in Globals.ThisAddIn.Application.ActiveWorkbook.Worksheets)
       {
+        // name ignores case and delete spaces
         if (name.ToLower().Trim() == sheet.Name.ToLower().Trim())
         {
           return sheet;
         }
       }
 
+      // callee have to check return value of this function
       return null;
     }
 
     private Chart GetChartByName(string name, Worksheet sheet)
     {
+      // iterate over all charts on given sheet and return chart with name
+      // chart`s name in excel is limited by 32 symbols so first we cut the
+      // name if it is longer
+
       string fix;
       if (name.Length > 32)
       {
@@ -89,11 +106,15 @@ namespace LucyAutoExAddIn
         }
       }
 
+      // callee have to check return value of this function
       return null;
     }
 
     private Range FindCell(string text, Worksheet sheet)
     {
+      // find cell with specific text in it
+      // text have to match exactly
+
       Range searchRange = sheet.get_Range("A1", "AAA999");
       Range foundRange = searchRange.Find(text, Type.Missing,
             XlFindLookIn.xlValues, XlLookAt.xlWhole,
@@ -104,13 +125,17 @@ namespace LucyAutoExAddIn
 
     private Range FindLastCell(Range cell)
     {
+      // iterating down until empty cell
+
       var result = cell.Offset[1, 0];
 
+      // cell value can be null or it can contain empty text
       while (null != result.Value2 && 0 != ((string)result.Value2).Trim().Length)
       {
         result = result.Offset[1, 0];
       }
 
+      // get back to last fulfilled cell
       result = result.Offset[-1, 0];
 
       return result;
@@ -118,6 +143,9 @@ namespace LucyAutoExAddIn
 
     private bool UpdateDate(Range fromRange, Range toRange, string suffix)
     {
+      // update cell with date of format 1 кв. 20
+      // to move it to next date
+
       string fromStr = fromRange.Value2;
       int sector = fromStr[0] - '0';
       string yearStr = fromStr.Substring(6);
@@ -142,6 +170,8 @@ namespace LucyAutoExAddIn
 
     private string UpdateChartFormula(string source)
     {
+      // update chart to move it down or prolongate it on one cell if it is shorter
+
       source = source.Trim();
       string result = "";
       int begin = 0;
@@ -214,6 +244,8 @@ namespace LucyAutoExAddIn
 
     private void UpdateCellValue(Range sourceRowsRange, Range sourceColsRange, int rowNumber, int colNumber, Range targetCell, int targetRightOffset)
     {
+      // take value from source cell and put to target
+
       Range sourceIntersectionCell = Globals.ThisAddIn.Application.Cells[((Range)sourceRowsRange.Item[rowNumber]).Row, sourceColsRange.Item[colNumber].Column];
       dynamic sourceValue = sourceIntersectionCell.Value2;
       var targetValueCell = targetCell.Offset[0, targetRightOffset]; // move right
@@ -227,12 +259,16 @@ namespace LucyAutoExAddIn
 
     private void RunProcess(Range sheetNamesRange, Range itemNamesRange, int jumpAmount, bool append, string suffix)
     {
+      // main logic goes here
+
       int progress = 0;
 
       foreach (Range sheetName in sheetNamesRange)
       {
+        // update progress
         ProgressBar.Label = "Progress: " + progress.ToString() + " / " + sheetNamesRange.Count;
 
+        // current sheet we are looking for
         string sheetNameStr = sheetName.Value2;
 
 #if DEBUG
