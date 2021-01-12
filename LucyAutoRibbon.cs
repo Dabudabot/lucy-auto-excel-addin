@@ -9,7 +9,6 @@ using Microsoft.Office.Tools.Ribbon;
 
 namespace LucyAutoExAddIn
 {
-
   // all ribbon magic happens here
 
   public partial class LucyAutoRibbon
@@ -17,6 +16,93 @@ namespace LucyAutoExAddIn
     private void LucyAutoRibbon_Load(object sender, RibbonUIEventArgs e)
     {
       // this function called as ribbon loaded
+    }
+
+    private string FixUpType(string type, string value)
+    {
+      if (type == "Shift")
+      {
+        int.TryParse(value, out int valueInt);
+        if (0 == valueInt)
+        {
+          return "Append";
+        }
+      }
+      return type;
+    }
+
+    private bool IsValidLookup(string type, string value)
+    {
+      // sorry for such code, must use enums
+      if (type != "Append" && type != "Exact" && type != "Shift")
+      {
+        return false;
+      }
+
+      if (type == "Shift")
+      {
+        return int.TryParse(value, out int valueInt);
+      }
+
+      // may be exact value also has to be cheched
+
+      return true;
+    }
+
+    private Range FindNextCellByType(string type, string value, Range source)
+    {
+      if (type == "Shift")
+      {
+        int.TryParse(value, out int valueInt);
+
+        if (valueInt > 0)
+        {
+          // search from the top
+          var result = source;
+
+          for (int i = 0; i < valueInt; i++)
+          {
+            result = result.Offset[1, 0];
+          }
+
+          return result;
+        }
+        else
+        {
+          // search from bottom
+
+          var result = FindLastCell(source);
+
+          for (int i = valueInt+1; i < 0; i++)
+          {
+            result = result.Offset[-1, 0];
+          }
+
+          return result;
+        }
+      }
+
+      if (type == "Exact")
+      {
+        var result = source.Offset[1, 0];
+
+        while (!((string)result.Value2).Contains(value))
+        {
+          result = result.Offset[1, 0];
+          if (result.Value2 == null)
+          {
+            // value was not found
+            // it will return null, send error message
+            
+            break;
+          }
+        }
+
+        return result;
+      }
+
+      // append by default
+      return FindLastCell(source);
     }
 
     private bool IsValidCell(string cell_str)
@@ -167,77 +253,106 @@ namespace LucyAutoExAddIn
 
       return true;
     }
+    private string UpdateChartFormulaPart(string source)
+    {
+      // input looks like 'Брянская область'!$A$28 or Москва!$A$131:$A$143
 
+      string second;
+      string[] prolog_value = source.Split('!');
+
+      if (2 != prolog_value.Length) 
+      {
+        MessageBox.Show("Failed with part of this chart: " + source, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return source; 
+      }
+
+      string[] values = prolog_value[1].Split(':');
+      string prolog = prolog_value[0];
+      string first = values[0];
+
+      if (2 == values.Length)
+      {
+        second = values[1];
+      }
+      else
+      {
+        second = first;
+      }
+
+      string value = first + ':' + second;
+
+      Regex numberRegex = new Regex(@"\d+");
+      MatchCollection numberMatches = numberRegex.Matches(value);
+      if(2 != numberMatches.Count)
+      {
+        MessageBox.Show("Failed with part of this chart: " + source, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return source;
+      }
+
+      if (!int.TryParse(numberMatches[0].Value, out int number1))
+      {
+        MessageBox.Show("Failed with part of this chart: " + source, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return source;
+      }
+
+      if (!int.TryParse(numberMatches[1].Value, out int number2))
+      {
+        MessageBox.Show("Failed with part of this chart: " + source, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return source;
+      }
+
+      number1++;
+      number2++;
+
+      if (number2 - number1 < 4)
+      {
+        number1--;
+      }
+
+      string result = prolog + '!' + value.Substring(0, numberMatches[0].Index);
+      result += number1.ToString();
+      result += value.Substring(
+        numberMatches[0].Index + numberMatches[0].Length,
+        numberMatches[1].Index - (numberMatches[0].Index + numberMatches[0].Length));
+      result += number2.ToString();
+
+      return result;
+    }
+    
     private string UpdateChartFormula(string source)
     {
       // update chart to move it down or prolongate it on one cell if it is shorter
 
       source = source.Trim();
-      string result = "";
-      int begin = 0;
-      bool skip = false;
+      string[] source_parts = source.Split(',');
+
+      if (4 != source_parts.Length)
+      {
+        MessageBox.Show("Strange chart: " + source, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return source;
+      }
+
       Regex orderRegex = new Regex(@"\,\d+\)");
-      Regex rangeRegex = new Regex(@"\$[A-Za-z]\$\d+\:\$[A-Za-z]\$\d+");
-      Regex numberRegex = new Regex(@"\d+");
-
       Match orderMatch = orderRegex.Match(source);
-
-      if (!orderMatch.Success) return null;
-
+      if (!orderMatch.Success) return source;
       if (!int.TryParse(orderMatch.Value.Substring(1, orderMatch.Value.Length - 2), out int order))
       {
-        return null;
+        MessageBox.Show("Failed with this chart: " + source, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return source;
       }
 
-      if (1 != order) skip = true;
+      string result = source_parts[0] + ',';
 
-      MatchCollection rangeMatches = rangeRegex.Matches(source);
-
-      foreach (Match rangeMatch in rangeMatches)
+      if (1 != order)
       {
-        result += source.Substring(begin, rangeMatch.Index - begin);
-        begin = (rangeMatch.Index + rangeMatch.Length);
-        MatchCollection numberMatches = numberRegex.Matches(rangeMatch.Value);
-        if (numberMatches.Count != 2)
-        {
-          return null;
-        }
-
-        result += rangeMatch.Value.Substring(0, numberMatches[0].Index);
-
-        if (!int.TryParse(numberMatches[0].Value, out int number1))
-        {
-          return null;
-        }
-
-        if (!int.TryParse(numberMatches[1].Value, out int number2))
-        {
-          return null;
-        }
-
-        if (!skip)
-        {
-          number1++;
-          number2++;
-
-          if (number2 - number1 < 4)
-          {
-            number1--;
-          }
-        }
-        else
-        {
-          skip = false;
-        }
-
-        result += number1.ToString();
-        result += rangeMatch.Value.Substring(
-          numberMatches[0].Index + numberMatches[0].Length,
-          numberMatches[1].Index - (numberMatches[0].Index + numberMatches[0].Length));
-        result += number2.ToString();
+        result += source_parts[1];
+      }
+      else
+      {
+        result += UpdateChartFormulaPart(source_parts[1]);
       }
 
-      result += source.Substring(begin);
+      result += ',' + UpdateChartFormulaPart(source_parts[2]) + ',' + source_parts[3];
 
       return result;
     }
@@ -257,7 +372,7 @@ namespace LucyAutoExAddIn
 #endif
     }
 
-    private void RunProcess(Range sheetNamesRange, Range itemNamesRange, int jumpAmount, bool append, string suffix)
+    private void RunProcess(Range sheetNamesRange, Range itemNamesRange, int jumpAmount, string lookupType, string lookup, string suffix)
     {
       // main logic goes here
 
@@ -274,6 +389,7 @@ namespace LucyAutoExAddIn
 #if DEBUG
         Debug.WriteLine("Target selected: " + sheetNameStr);
 #endif
+        // now we found the sheet we are looking for
         Worksheet targetSheet = GetSheetByName(sheetNameStr);
 
         if (null == targetSheet)
@@ -282,8 +398,10 @@ namespace LucyAutoExAddIn
           continue;
         }
 
+        // iterating over the values names col
         for (var i = 1; i <= itemNamesRange.Count; i += (jumpAmount+1))
         {
+          // this is the name that we are looking for on the sheet
           string lookingText = ((Range)itemNamesRange.Item[i]).Value2;
 
 #if DEBUG
@@ -303,11 +421,18 @@ namespace LucyAutoExAddIn
           Debug.WriteLine("Found cell: " + lookingTextCell.Row + " - " + lookingTextCell.Column + " with text: " + lookingText);
 #endif
 
-          var lastCell = FindLastCell(lookingTextCell.Offset[1, 0]);
+          // the value that we are inserting is under the cell with value name
+          // so we are looking for the last filled cell, this is col with dates
+          var lastCell = FindNextCellByType(lookupType, lookup, lookingTextCell.Offset[1, 0]);
 
           if (null == lastCell)
           {
             MessageBox.Show("Failed to find last avaliable cell for " + lookingText + " on sheet " + sheetNameStr, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            continue;
+          }
+          else if (lookupType == "Exact" && null == lastCell.Value2)
+          {
+            MessageBox.Show("This value: " + lookup + " was not found, on sheet " + sheetNameStr, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             continue;
           }
 
@@ -315,6 +440,7 @@ namespace LucyAutoExAddIn
           Debug.WriteLine("Found last cell: " + lastCell.Row + " - " + lastCell.Column + " with text: " + (string)lastCell.Value2);
 #endif
 
+          // remove the value 'П' from this last date
           lastCell.Value2 = ((string)lastCell.Value2).Trim(new char[] { 'П' });
 
 #if DEBUG
@@ -323,7 +449,7 @@ namespace LucyAutoExAddIn
 
           Range targetCell;
 
-          if (append)
+          if (lookupType == "Append")
           {
             var downCell = lastCell.Offset[1, 0]; // move down
             downCell.EntireRow.Insert(XlInsertShiftDirection.xlShiftDown);
@@ -355,7 +481,8 @@ namespace LucyAutoExAddIn
             }
           }
 
-          if (append)
+          // chart shift
+          if (lookupType == "Append")
           {
             // get graph
             var chart = GetChartByName(lookingText, targetSheet);
@@ -391,7 +518,8 @@ namespace LucyAutoExAddIn
       Debug.WriteLine("CellsRangeBox value: " + ItemsRangeBox.Text);
       Debug.WriteLine("JumpAmountBox value: " + JumpAmountBox.Text);
       Debug.WriteLine("DateSuffixBox value: " + DateSuffixBox.Text);
-      Debug.WriteLine("AppendBox value: " + AppendBox.Checked);
+      Debug.WriteLine("LookupBox value: " + LookupBox.Text);
+      Debug.WriteLine("LookupTypeBox value: " + LookupTypeBox.Text);
 #endif
 
       if (!IsValidRange(SheetsRangeBox.Text))
@@ -412,17 +540,26 @@ namespace LucyAutoExAddIn
         return;
       }
 
+      if (!IsValidLookup(LookupTypeBox.Text, LookupBox.Text))
+      {
+        MessageBox.Show("Lookup value are wrong!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return;
+      }
+
 #if DEBUG
       Debug.WriteLine("Input parameters are OK!");
 #endif
+
+      string type = FixUpType(LookupTypeBox.Text, LookupBox.Text);
 
       RunBtn.Visible = false;
       ProgressBar.Visible = true;
 
       RunProcess(Globals.ThisAddIn.Application.get_Range(SheetsRangeBox.Text), 
         Globals.ThisAddIn.Application.get_Range(ItemsRangeBox.Text), 
-        jumpAmountValue, 
-        AppendBox.Checked,
+        jumpAmountValue,
+        type,
+        LookupBox.Text,
         DateSuffixBox.Text
       );
 

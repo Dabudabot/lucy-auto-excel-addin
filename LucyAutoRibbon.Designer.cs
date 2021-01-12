@@ -34,6 +34,9 @@
     /// </summary>
     private void InitializeComponent()
     {
+      Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl1 = this.Factory.CreateRibbonDropDownItem();
+      Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl2 = this.Factory.CreateRibbonDropDownItem();
+      Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl3 = this.Factory.CreateRibbonDropDownItem();
       this.AutomatizationRibbon = this.Factory.CreateRibbonTab();
       this.Automatization = this.Factory.CreateRibbonGroup();
       this.box1 = this.Factory.CreateRibbonBox();
@@ -42,14 +45,18 @@
       this.JumpAmountBox = this.Factory.CreateRibbonEditBox();
       this.separator1 = this.Factory.CreateRibbonSeparator();
       this.box2 = this.Factory.CreateRibbonBox();
-      this.AppendBox = this.Factory.CreateRibbonCheckBox();
       this.DateSuffixBox = this.Factory.CreateRibbonEditBox();
       this.RunBtn = this.Factory.CreateRibbonButton();
       this.ProgressBar = this.Factory.CreateRibbonLabel();
+      this.LookupBox = this.Factory.CreateRibbonEditBox();
+      this.LookupTypeBox = this.Factory.CreateRibbonComboBox();
+      this.box3 = this.Factory.CreateRibbonBox();
+      this.separator2 = this.Factory.CreateRibbonSeparator();
       this.AutomatizationRibbon.SuspendLayout();
       this.Automatization.SuspendLayout();
       this.box1.SuspendLayout();
       this.box2.SuspendLayout();
+      this.box3.SuspendLayout();
       this.SuspendLayout();
       // 
       // AutomatizationRibbon
@@ -65,6 +72,8 @@
       this.Automatization.Items.Add(this.box1);
       this.Automatization.Items.Add(this.separator1);
       this.Automatization.Items.Add(this.box2);
+      this.Automatization.Items.Add(this.separator2);
+      this.Automatization.Items.Add(this.box3);
       this.Automatization.Label = "Lucy`s automatization";
       this.Automatization.Name = "Automatization";
       // 
@@ -104,17 +113,10 @@
       // box2
       // 
       this.box2.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
-      this.box2.Items.Add(this.AppendBox);
       this.box2.Items.Add(this.DateSuffixBox);
-      this.box2.Items.Add(this.RunBtn);
-      this.box2.Items.Add(this.ProgressBar);
+      this.box2.Items.Add(this.LookupBox);
+      this.box2.Items.Add(this.LookupTypeBox);
       this.box2.Name = "box2";
-      // 
-      // AppendBox
-      // 
-      this.AppendBox.Label = "Append";
-      this.AppendBox.Name = "AppendBox";
-      this.AppendBox.ScreenTip = "If selected then create new cell on found";
       // 
       // DateSuffixBox
       // 
@@ -135,6 +137,39 @@
       this.ProgressBar.Name = "ProgressBar";
       this.ProgressBar.Visible = false;
       // 
+      // LookupBox
+      // 
+      this.LookupBox.Label = "Lookup:";
+      this.LookupBox.Name = "LookupBox";
+      this.LookupBox.Text = null;
+      // 
+      // LookupTypeBox
+      // 
+      ribbonDropDownItemImpl1.Label = "Exact";
+      ribbonDropDownItemImpl1.ScreenTip = "Enter exact value to lookup";
+      ribbonDropDownItemImpl2.Label = "Shift";
+      ribbonDropDownItemImpl2.ScreenTip = "Enter shift value to lookup";
+      ribbonDropDownItemImpl2.SuperTip = "enter -1 to find last";
+      ribbonDropDownItemImpl3.Label = "Append";
+      ribbonDropDownItemImpl3.ScreenTip = "Append value";
+      this.LookupTypeBox.Items.Add(ribbonDropDownItemImpl1);
+      this.LookupTypeBox.Items.Add(ribbonDropDownItemImpl2);
+      this.LookupTypeBox.Items.Add(ribbonDropDownItemImpl3);
+      this.LookupTypeBox.Label = "Lookup type:";
+      this.LookupTypeBox.Name = "LookupTypeBox";
+      this.LookupTypeBox.Text = "Append";
+      // 
+      // box3
+      // 
+      this.box3.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
+      this.box3.Items.Add(this.ProgressBar);
+      this.box3.Items.Add(this.RunBtn);
+      this.box3.Name = "box3";
+      // 
+      // separator2
+      // 
+      this.separator2.Name = "separator2";
+      // 
       // LucyAutoRibbon
       // 
       this.Name = "LucyAutoRibbon";
@@ -149,6 +184,8 @@
       this.box1.PerformLayout();
       this.box2.ResumeLayout(false);
       this.box2.PerformLayout();
+      this.box3.ResumeLayout(false);
+      this.box3.PerformLayout();
       this.ResumeLayout(false);
 
     }
@@ -161,12 +198,15 @@
     internal Microsoft.Office.Tools.Ribbon.RibbonEditBox SheetsRangeBox;
     internal Microsoft.Office.Tools.Ribbon.RibbonEditBox ItemsRangeBox;
     internal Microsoft.Office.Tools.Ribbon.RibbonEditBox JumpAmountBox;
-    internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox AppendBox;
     internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator1;
     internal Microsoft.Office.Tools.Ribbon.RibbonEditBox DateSuffixBox;
     internal Microsoft.Office.Tools.Ribbon.RibbonBox box1;
     internal Microsoft.Office.Tools.Ribbon.RibbonBox box2;
     internal Microsoft.Office.Tools.Ribbon.RibbonLabel ProgressBar;
+    internal Microsoft.Office.Tools.Ribbon.RibbonEditBox LookupBox;
+    internal Microsoft.Office.Tools.Ribbon.RibbonComboBox LookupTypeBox;
+    internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator2;
+    internal Microsoft.Office.Tools.Ribbon.RibbonBox box3;
   }
 
   partial class ThisRibbonCollection

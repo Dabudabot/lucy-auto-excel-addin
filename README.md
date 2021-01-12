@@ -21,9 +21,23 @@ Cells range - on found sheets it will look for text that equals to the data from
 
 Jump amount - text from previous field may go with gaps due to target values (in the example above it is options), this number is amount of them
 
-Append - if checked add to target lists new row else replace the last one
+Lookup type - possible variants of lookup: Append, Shift, Exact.
+
+Lookup - accepts string to lookup, ignored if Append type choosen. Accepts number if Shift choosen. Accepts any string if Exact choosen.
 
 Date suffix - on Y axis replaced or added values will have this suffix
+
+Append type means that in col of values the solution will find the last one, then create new row and write values there.
+
+Shift type means that in col of values the solution will shift <Lookup> amount of rows and set the values there. Note if you want to shift from top you gave to put positive values. If you want to shift from bottom negative ones. For example to find the last value you must put -1 to lookup. To find first put 1. If you will put 0 it will be the same as Append.
+
+![example1](docs/shift.PNG)
+
+![example1](docs/last.PNG)
+
+Exact type means that in col of values the solution will search for cell that contains text that was written in lookup. If such cell was not found warning will be triggered.
+
+![example1](docs/exact.PNG)
 
 The result of the work:
 
