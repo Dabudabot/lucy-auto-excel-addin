@@ -3,7 +3,7 @@ Small excel addin for automatization for statistics and charts
 
 How it looks:
 
-![howitlooks](docs/howitlooks.PNG)
+![howitlooks](docs/howitlooks_2.PNG)
 
 How to use:
 
@@ -13,7 +13,7 @@ In case if you have for example such table:
 
 You fullfill the addin with following data:
 
-![example1](docs/example11.PNG)
+![example1](docs/example11_2.PNG)
 
 Sheets range - on current page addin will look throught this range and find each sheet in this document from this range.
 
@@ -51,7 +51,7 @@ Another example:
 
 Here we do not have target values after cell
 
-![example1](docs/example21.PNG)
+![example1](docs/example21_2.PNG)
 
 Result
 
